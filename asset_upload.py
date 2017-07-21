@@ -131,8 +131,9 @@ if __name__ == '__main__':
 
     uname = f.readline().strip()
     password = f.readline().strip()
+    IP = f.readline().strip()
 
-    sc = SecurityCenter('54.236.31.85')
+    sc = SecurityCenter(IP)
     sc.login(uname, password)
 
     if sc.authenticated():
