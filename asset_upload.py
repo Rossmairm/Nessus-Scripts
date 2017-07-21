@@ -59,6 +59,7 @@ class SecurityCenter:
         SecurityCenter server. If the session token and cookie are available,
         add them to the request headers. Also specify the content-type as JSON
         and check for any errors in the response. """
+
         headers = {
             'Content-Type': 'application/json',
         }
@@ -73,7 +74,7 @@ class SecurityCenter:
             data = json.dumps(data)
 
         url = "https://{0}/rest/{1}".format(self._server, resource)
-        #print('Making {0} request to {1}'.format(method, resource))
+
         try:
             if method == 'POST':
                 r = requests.post(url, data=data, headers=headers, verify=self._verify)
@@ -87,8 +88,9 @@ class SecurityCenter:
                 r = requests.get(url, params=data, headers=headers, verify=self._verify)
         except requests.ConnectionError, e:
             print str(e)
-            print "we got here"
             return None
+
+        #Uncomment for Debugging or to redirect to a log file
 
         #print('Request Headers: {0}'.format(r.request.headers))
         #print('Request Data: {0}'.format(r.request.body))
@@ -103,13 +105,13 @@ class SecurityCenter:
         try:
             contents = r.json()
         except ValueError as e:
-           # print (e)
+            print (e)
             print "no JSON"
             return None
 
         # If the response status is not 200 OK, there is an error.
         if contents['error_code'] != 0:
-            #print(contents['error_msg'])
+            print(contents['error_msg'])
             return None
 
         # Return the contents of the response field from the SecurityCenter
@@ -122,13 +124,13 @@ if __name__ == '__main__':
 
     requests.packages.urllib3.disable_warnings()
 
-   #grabs creds from a file
+    #grabs creds from a file
 
     #f = open('creds', 'r') #used for running locally
     f = open('../../Nessus-Scripts/creds', 'r') #used in conjunction with AWS script
 
-    uname= f.readline().strip()
-    password=f.readline().strip()
+    uname = f.readline().strip()
+    password = f.readline().strip()
 
     sc = SecurityCenter('54.236.31.85')
     sc.login(uname, password)
@@ -137,7 +139,7 @@ if __name__ == '__main__':
 
         resp = sc.connect('GET', 'asset')
 
-        #Grabs IP from a file and uploads them to SC based on input
+        #Finds ID from for the asset name in args, then uploads IPs to that asset from a txt file of the same name
 
         asset = sys.argv[1]
         for v in resp['usable']:
@@ -150,11 +152,6 @@ if __name__ == '__main__':
                     print list
                     input={'definedIPs' : list}
                 resp = sc.connect('PATCH', 'asset/'+ v['id'], input)
-        """
-        Call to logout
-        """
-
-
         sc.logout()
 
 
