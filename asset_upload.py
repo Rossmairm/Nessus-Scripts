@@ -123,7 +123,10 @@ class SecurityCenter:
 if __name__ == '__main__':
 
     requests.packages.urllib3.disable_warnings()
-
+    if (len(sys.argv) != 2):
+        print "\n[!] Takes one argument"
+        print "\n[*] Usage: python asset_upload.py <Asset-Name>\n"
+        sys.exit(0)
     #grabs creds from a file
 
     #f = open('creds', 'r') #used for running locally
