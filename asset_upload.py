@@ -124,7 +124,9 @@ if __name__ == '__main__':
 
    #grabs creds from a file
 
-    f = open('creds', 'r')
+    #f = open('creds', 'r') #used for running locally
+    f = open('../../Nessus-Scripts/creds', 'r') #used in conjunction with AWS script
+
     uname= f.readline().strip()
     password=f.readline().strip()
 
