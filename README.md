@@ -21,7 +21,7 @@ When using this script, it will try top grab the IP addresses from a txt file wi
 [AWS-Scripts]: <https://github.com/Rossmairm/AWS-scripts>
 
 ### IP list file
-Using `dev` again from teh previous example, IP list should look like this:
+Using `dev` again from the previous example, IP list should look like this:
 
 dev.txt
 ```
@@ -30,11 +30,11 @@ dev.txt
 10.0.0.3
 ```
 ## Version
-0.2
+0.3
 
 ## TO DO
 
-* Clean up`asset_upload.py`
+* Clean up `asset_upload.py`
 * Add error handling
 * Break out code into methods or packages
 
