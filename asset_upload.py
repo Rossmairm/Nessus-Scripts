@@ -127,10 +127,11 @@ if __name__ == '__main__':
         print "\n[!] Takes one argument"
         print "\n[*] Usage: python asset_upload.py <Asset-Name>\n"
         sys.exit(0)
+
     #grabs creds from a file
 
-    #f = open('creds', 'r') #used for running locally
-    f = open('../../Nessus-Scripts/creds', 'r') #used in conjunction with AWS script
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    f = open(dir_path + '/creds', 'r')
 
     uname = f.readline().strip()
     password = f.readline().strip()
@@ -141,22 +142,31 @@ if __name__ == '__main__':
 
     if sc.authenticated():
 
-        resp = sc.connect('GET', 'asset')
+        try:
+            resp = sc.connect('GET', 'asset')
+        except:
+            e = sys.exc_info()[0]
+            #print (e)
+            print "Couldn't get assets"
+            sys.exit(0)
 
         #Finds ID from for the asset name in args, then uploads IPs to that asset from a txt file of the same name
 
         asset = sys.argv[1]
         for v in resp['usable']:
             if v['name'] == asset:
-                f = open(asset +'.txt', 'r')
-                list=""
-                for ip in f:
-                    list= list + str(ip)
+                try:
+                    f = open(asset +'.txt', 'r')
+                    list=""
+                    for ip in f:
+                        list= list + str(ip)
 
-                    print list
                     input={'definedIPs' : list}
-                resp = sc.connect('PATCH', 'asset/'+ v['id'], input)
+                    resp = sc.connect('PATCH', 'asset/'+ v['id'], input)
+                    print "[*] " + asset + " updated"
+                except:
+                    e = sys.exc_info()[0]
+                    #print (e)
+                    print "Something is wrong with you file or asset could not be updated"
+                    sys.exit(0)
         sc.logout()
-
-
-

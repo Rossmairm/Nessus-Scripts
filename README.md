@@ -34,7 +34,7 @@ If using this with the IP scanner from the [AWS-Scripts] repo, make sure the fil
 
 * Clean up`asset_upload.py`
 * Add error handling
-
+* Break out code into methods or packages
 
 License
 ----
