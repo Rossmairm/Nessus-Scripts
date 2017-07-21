@@ -26,3 +26,18 @@ If using this with the IP scanner from the [AWS-Scripts] repo, make sure the fil
 
 [ip_scan]: <https://github.com/Rossmairm/AWS-scripts/tree/master/ip_scan>
 [AWS-Scripts]: <https://github.com/Rossmairm/AWS-scripts>
+
+### Version
+0.2
+
+## TO DO
+
+* Clean up`asset_upload.py`
+* Add error handling
+
+
+License
+----
+
+MIT
+
