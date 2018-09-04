@@ -5,8 +5,8 @@ import os
 import re
 
 
-class SecurityCenter:
-
+class SecurityCenter():
+    
     def __init__(self, server, verify_ssl=False):
         self._server = server
         self._verify = verify_ssl
@@ -65,7 +65,7 @@ class SecurityCenter:
         }
 
         if self._token != '':
-            headers['X-SecurityCenter'] = self._token
+            headers['X-SecurityCenter'] = str(self._token)
         if self._cookie != '':
             headers['Cookie'] = self._cookie
 
@@ -86,8 +86,8 @@ class SecurityCenter:
                 r = requests.patch(url, data=data, headers=headers, verify=self._verify)
             else:
                 r = requests.get(url, params=data, headers=headers, verify=self._verify)
-        except requests.ConnectionError, e:
-            print str(e)
+        except requests.ConnectionError as e:
+            print(str(e))
             return None
 
         #Uncomment for Debugging or to redirect to a log file
@@ -104,9 +104,9 @@ class SecurityCenter:
         # Make sure we have a JSON response. If not then return None.
         try:
             contents = r.json()
-        except ValueError as e:
+        except(ValueError , e):
             print (e)
-            print "no JSON"
+            print("no JSON")
             return None
 
         # If the response status is not 200 OK, there is an error.
@@ -119,13 +119,67 @@ class SecurityCenter:
         return contents['response']
 
 
+    def analysis(self, query, limit=100):
+        """
+        Queries the SC server for a list of vulnerabilities or events that
+        match the given parameters. The SC server is queried for results in
+        groups of 1000. Yields results that match the parameters or None if
+        there is an error. Returns no more than limit results.
+        """
+
+        received = 0
+        step = 1000
+        query['startOffset'] = 0
+        query['endOffset'] = 0
+        total = limit
+
+        if query.get('id') is not None:
+            input = {'type': 'vuln',
+                     'sourceType': 'cumulative',
+                     'query': query}
+        else:
+            input = {'type': query['type'],
+                     'sourceType': query['subtype'],
+                     'query': query}
+
+        while (received < limit) and (received < total):
+
+            # If my endOffset is larger than max, set it to max.
+            if received + step > limit:
+                query['endOffset'] = limit
+            else:
+                query['endOffset'] += step
+
+            """
+            For additional troubleshooting, you can uncomment the following two lines of code.
+            Uncommenting them will display the QUERY and INPUT strings in the output
+            """
+            #print 'QUERY:\n{0}\n'.format(query)
+            #print 'INPUT:\n{0}\n'.format(input)
+
+            response = self.connect('POST', 'analysis', input)
+
+            # There is an error
+            if response is None:
+                received = limit + 1
+                continue
+
+            # process the returned records
+            received += response['returnedRecords']
+            total = int(response['totalRecords'])
+            print('Received {0} of {1} records.'.format(received,total))
+
+            for v in response['results']:
+                yield v
+
+            query['startOffset'] = query['endOffset']
 
 if __name__ == '__main__':
 
     requests.packages.urllib3.disable_warnings()
     if (len(sys.argv) != 2):
-        print "\n[!] Takes one argument"
-        print "\n[*] Usage: python asset_upload.py <Asset-Name>\n"
+        print ("\n[!] Takes one argument")
+        print ("\n[*] Usage: python asset_upload.py <Asset-Name>\n")
         sys.exit(0)
 
     #grabs creds from a file
@@ -147,7 +201,7 @@ if __name__ == '__main__':
         except:
             e = sys.exc_info()[0]
             #print (e)
-            print "Couldn't get assets"
+            print ("Couldn't get assets")
             sys.exit(0)
 
         #Finds ID from for the asset name in args, then uploads IPs to that asset from a txt file of the same name
@@ -163,10 +217,10 @@ if __name__ == '__main__':
 
                     input={'definedIPs' : list}
                     resp = sc.connect('PATCH', 'asset/'+ v['id'], input)
-                    print "[*] " + asset + " updated"
+                    print("[*] " + asset + " updated")
                 except:
                     e = sys.exc_info()[0]
                     #print (e)
-                    print "Something is wrong with you file or asset could not be updated"
+                    print("Something is wrong with you file or asset could not be updated")
                     sys.exit(0)
         sc.logout()
